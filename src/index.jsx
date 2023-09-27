@@ -1,27 +1,49 @@
-import React from "react";
-import ReactDOM from "react-dom";
+import React from 'react';
+import ReactDOM from 'react-dom';
 import './index.css';
-import App from "./app.jsx";
+import App from './app.jsx';
 import { HelmetProvider } from 'react-helmet-async';
+import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
+import Footer from './Components/Footer';
+import TopPage from './Components/TopPage';
+import TodoDetails from './Components/TodoDetails';
+import ErrorPage from './Components/ErrorPage';
+const AppLayout = () => {
+  return (
+    <React.Fragment>
+      <App />
+      <Outlet />
+      <Footer />
+    </React.Fragment>
+  );
+};
 
-/*
-Root of react site 
-- Imports Helment provider for the page head
-- And App which defines the content and navigation
-*/
-
-// Render the site https://reactjs.org/docs/react-dom.html#render
+const appRouter = createBrowserRouter([
+  {
+    path: '/',
+    element: <AppLayout />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        path: '/',
+        element: <TopPage />,
+      },
+      {
+        path: '/todo/:todoId',
+        element: <TodoDetails />,
+      },
+    ],
+  },
+]);
 ReactDOM.render(
   <React.StrictMode>
     <HelmetProvider>
-      <App />
+      <RouterProvider router={appRouter} />
     </HelmetProvider>
   </React.StrictMode>,
-  document.getElementById("root")
+  document.getElementById('root')
 );
 
-// Hot Module Replacement (HMR) - Remove this snippet to remove HMR.
-// Learn more: https://vitejs.dev/guide/api-hmr.html
 if (import.meta.hot) {
   import.meta.hot.accept();
 }

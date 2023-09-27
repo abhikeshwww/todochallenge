@@ -1,5 +1,8 @@
-import React, { useEffect, useState } from "react";
-import Card from "./Card";
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import Card from './Card';
+import { TODO_ITEMS_API } from '../utils/constants';
+import Shimmer from './Shimmer';
 // a top page (route: '/') for displaying/searching a list of TODO items
 //## Top page requirements
 /**the page should display the list of todo items fetched from the https://jsonplaceholder.typicode.com/todos API (visit the URL to see the data format)
@@ -15,36 +18,62 @@ Example:
  */
 const TopPage = () => {
   const [todoItems, setTodoItems] = useState([]);
-  const [searchedItems, setSearchedItems] = useState([])
-  const [searchResult, setSearchResult] = useState([])
+  const [searchText, setSearchText] = useState([]);
+  const [searchedItems, setSearchedItems] = useState([]);
   useEffect(() => {
     getTodoItems();
   }, []);
 
-  const updateSearchResults = (inputString)=>{
-  let data = todoItems.find(item=>item.title.contains())
-  }
+  useEffect(() => {
+    getSearchItems(searchText, todoItems);
+  }, [searchText]);
 
   const getTodoItems = async () => {
-    const data = await fetch("https://jsonplaceholder.typicode.com/todos");
+    const data = await fetch(TODO_ITEMS_API);
     const json = await data.json();
-    console.log(json[0]);
+   
     setTodoItems(json);
-    setSearchedItems(json)
+  };
+
+  const getSearchItems = (searchText, todoItems) => {
+    if (searchText != '') {
+      const data = todoItems.filter((todo) =>
+        todo?.title.toLowerCase().includes(searchText.toLowerCase())
+      );
+      data.length === '0' ? '' : setSearchedItems(data);
+      console.log(searchedItems[0]);
+    } else setSearchedItems(todoItems);
   };
 
   return (
-    <div>
+    <div className='
+    w-[100vw]'> 
       <div>
-        <h1>
-        </h1>
-        <input type="text" onChange={updateSearchResults}></input>
+        <h1></h1>
+        <div className="flex justify-center flex-col items-center">
+          <h1>*Search by Title includes*</h1>
+          <input
+            className="border rounded-lg p-2"
+            placeholder="Search a todo item..."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            type="text"></input>
+        </div>
       </div>
-      <div className="flex flex-wrap">
-        {todoItems.map((searchedItems) => (
-          <Card todo={searchedItems}></Card>
-        ))}
-      </div>
+      {todoItems.length=='0'?<Shimmer type={"todo"} ></Shimmer>:   <div className="flex flex-wrap justify-center">
+        {searchText == ''
+          ? todoItems.map((todo) => (
+              <Link to={'/todo/' + todo?.id} key={todo?.id}>
+                <Card todo={todo}></Card>
+              </Link>
+            ))
+          : searchedItems?.map((todo) => (
+              <Link to={'/todo/' + todo?.id} key={todo?.id}>
+                <Card todo={todo}></Card>
+              </Link>
+            ))}
+      </div>}
+
     </div>
   );
 };
